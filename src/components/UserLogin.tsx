@@ -34,9 +34,9 @@ export const UserLogin: React.FC<UserLoginProps> = ({ onLoginSuccess }) => {
       } else {
         setError(data.error || "Email Anda belum terdaftar dalam sistem.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Gagal menghubungi server. Pastikan koneksi Anda aktif.");
+      setError("Gagal menghubungi server: " + (err.message || JSON.stringify(err) || "Koneksi terputus."));
     } finally {
       setLoading(false);
     }
