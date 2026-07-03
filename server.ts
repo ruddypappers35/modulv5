@@ -48,17 +48,140 @@ function saveHistoryData(data: any) {
   }
 }
 
+// Database allowed_emails.json helpers
+const EMAILS_PATH = path.join(DB_DIR, "allowed_emails.json");
+
+function ensureEmailsDbExists() {
+  ensureDbExists();
+  if (!fs.existsSync(EMAILS_PATH)) {
+    // Inisialisasi awal dengan email admin default
+    fs.writeFileSync(EMAILS_PATH, JSON.stringify(["rudy@admin.com"], null, 2), "utf-8");
+  }
+}
+
+function getAllowedEmails(): string[] {
+  try {
+    ensureEmailsDbExists();
+    const raw = fs.readFileSync(EMAILS_PATH, "utf-8");
+    return JSON.parse(raw);
+  } catch (error) {
+    console.error("Gagal membaca allowed_emails.json", error);
+    return ["rudy@admin.com"];
+  }
+}
+
+function saveAllowedEmails(emails: string[]) {
+  try {
+    ensureEmailsDbExists();
+    fs.writeFileSync(EMAILS_PATH, JSON.stringify(emails, null, 2), "utf-8");
+    return true;
+  } catch (error) {
+    console.error("Gagal menyimpan allowed_emails.json", error);
+    return false;
+  }
+}
+
+// Middleware untuk memvalidasi apakah user diperbolehkan mengakses aplikasi
+function checkAuth(req: any, res: any, next: any) {
+  const email = req.headers["x-user-email"];
+  if (!email) {
+    return res.status(401).json({ error: "Akses Ditolak. Email user tidak disediakan." });
+  }
+  const allowed = getAllowedEmails();
+  if (!allowed.includes(email.trim().toLowerCase())) {
+    return res.status(403).json({ error: "Akses Ditolak. Email Anda belum terdaftar untuk mengakses aplikasi." });
+  }
+  next();
+}
+
+// Middleware untuk memvalidasi otorisasi admin
+function checkAdminAuth(req: any, res: any, next: any) {
+  const authHeader = req.headers["authorization"];
+  if (authHeader === "Bearer admin-session-token-ryuna") {
+    next();
+  } else {
+    res.status(401).json({ error: "Akses Ditolak. Sesi admin tidak valid atau kedaluwarsa." });
+  }
+}
+
 // API Routes
 const apiRouter = express.Router();
 
+// A. Auth & Admin Routes
+
+// 1. Cek validitas email normal user
+apiRouter.post("/auth/check-email", (req, res) => {
+  const { email } = req.body;
+  if (!email || typeof email !== "string") {
+    return res.status(400).json({ error: "Email wajib diisi dengan format yang benar." });
+  }
+  const normalized = email.trim().toLowerCase();
+  const allowed = getAllowedEmails();
+  if (allowed.includes(normalized)) {
+    res.json({ success: true, email: normalized });
+  } else {
+    res.status(403).json({ error: "Email Anda belum terdaftar. Silakan hubungi admin untuk mendapatkan akses." });
+  }
+});
+
+// 2. Login Admin
+apiRouter.post("/admin/login", (req, res) => {
+  const { username, password } = req.body;
+  if (username === "rudy@admin.com" && password === "Ryuna0106") {
+    res.json({ success: true, token: "admin-session-token-ryuna" });
+  } else {
+    res.status(401).json({ error: "Username atau password admin salah." });
+  }
+});
+
+// 3. Get list email terdaftar (Admin)
+apiRouter.get("/admin/emails", checkAdminAuth, (req, res) => {
+  const emails = getAllowedEmails();
+  res.json(emails);
+});
+
+// 4. Add email ke whitelist (Admin)
+apiRouter.post("/admin/emails", checkAdminAuth, (req, res) => {
+  const { email } = req.body;
+  if (!email || typeof email !== "string" || !email.includes("@")) {
+    return res.status(400).json({ error: "Format email tidak valid." });
+  }
+  const normalized = email.trim().toLowerCase();
+  const emails = getAllowedEmails();
+  if (emails.includes(normalized)) {
+    return res.status(400).json({ error: "Email sudah terdaftar dalam sistem." });
+  }
+  emails.push(normalized);
+  saveAllowedEmails(emails);
+  res.json({ success: true, emails });
+});
+
+// 5. Delete email dari whitelist (Admin)
+apiRouter.delete("/admin/emails/:email", checkAdminAuth, (req, res) => {
+  const { email } = req.params;
+  const normalized = email.trim().toLowerCase();
+  if (normalized === "rudy@admin.com") {
+    return res.status(400).json({ error: "Email admin utama tidak dapat dihapus." });
+  }
+  let emails = getAllowedEmails();
+  if (!emails.includes(normalized)) {
+    return res.status(404).json({ error: "Email tidak ditemukan." });
+  }
+  emails = emails.filter(e => e !== normalized);
+  saveAllowedEmails(emails);
+  res.json({ success: true, emails });
+});
+
+// B. Perencanaan & Modul Ajar Routes (Memerlukan checkAuth)
+
 // 1. Get History
-apiRouter.get("/history", (req, res) => {
+apiRouter.get("/history", checkAuth, (req, res) => {
   const data = getHistoryData();
   res.json(data);
 });
 
 // 2. Add History
-apiRouter.post("/history", (req, res) => {
+apiRouter.post("/history", checkAuth, (req, res) => {
   const newRecord = {
     id: req.body.id || Math.random().toString(36).substr(2, 9),
     timestamp: new Date().toISOString(),
@@ -85,14 +208,14 @@ apiRouter.post("/history", (req, res) => {
   };
 
   const currentData = getHistoryData();
-  currentData.unshift(newRecord); // Tambahkan di awal agar riwayat terbaru di atas
+  currentData.unshift(newRecord);
   saveHistoryData(currentData);
 
   res.status(201).json(newRecord);
 });
 
-// 3. Update History (misalnya menambahkan LKPD ke modul ajar yang sudah ada)
-apiRouter.put("/history/:id", (req, res) => {
+// 3. Update History
+apiRouter.put("/history/:id", checkAuth, (req, res) => {
   const { id } = req.params;
   const currentData = getHistoryData();
   const index = currentData.findIndex((item: any) => item.id === id);
@@ -104,7 +227,7 @@ apiRouter.put("/history/:id", (req, res) => {
   currentData[index] = {
     ...currentData[index],
     ...req.body,
-    timestamp: new Date().toISOString() // perbarui timestamp aktivitas terakhir
+    timestamp: new Date().toISOString()
   };
 
   saveHistoryData(currentData);
@@ -112,7 +235,7 @@ apiRouter.put("/history/:id", (req, res) => {
 });
 
 // 4. Delete History
-apiRouter.delete("/history/:id", (req, res) => {
+apiRouter.delete("/history/:id", checkAuth, (req, res) => {
   const { id } = req.params;
   const currentData = getHistoryData();
   const filtered = currentData.filter((item: any) => item.id !== id);
@@ -126,7 +249,7 @@ apiRouter.delete("/history/:id", (req, res) => {
 });
 
 // 4.5. Restore History
-apiRouter.post("/history/restore", (req, res) => {
+apiRouter.post("/history/restore", checkAuth, (req, res) => {
   const { records } = req.body;
   if (!Array.isArray(records)) {
     return res.status(400).json({ error: "Format data tidak valid. 'records' harus berupa array." });
@@ -140,10 +263,8 @@ apiRouter.post("/history/restore", (req, res) => {
 });
 
 // 5. AI Generation Endpoint (Modul Ajar & LKPD)
-apiRouter.post("/generate", async (req, res) => {
+apiRouter.post("/generate", checkAuth, async (req, res) => {
   const { prompt, userApiKey } = req.body;
-  
-  // Gunakan API Key dari pengguna jika diinput, jika tidak gunakan env variable GEMINI_API_KEY
   const apiKey = userApiKey || process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
