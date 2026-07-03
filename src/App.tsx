@@ -1784,7 +1784,7 @@ Gunakan CSS Tailwind bawaan yang ramah cetak (text-black, font-serif, border-bla
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t-2 border-slate-800 py-4 text-center text-xs mt-12">
+      <footer className="bg-white border-t-2 border-slate-800 py-3 text-center text-xs sticky bottom-0 z-35 mt-auto">
         <div className="max-w-[1440px] 2xl:max-w-[1536px] mx-auto px-4">
           <p className="font-semibold text-slate-600 font-sans">
             © 2026 GenModul AI • Created by Rudy Susanto
