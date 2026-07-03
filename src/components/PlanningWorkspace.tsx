@@ -396,7 +396,7 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                   </p>
                 </div>
               ) : editedProta ? (
-                <div className="bg-card border-2 border-foreground rounded-xl p-6 shadow-brutal-sm flex flex-col h-full">
+                <div className="flex flex-col h-full w-full">
                   {/* Prota Header */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="text-center flex-1">
