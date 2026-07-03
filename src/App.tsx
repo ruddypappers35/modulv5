@@ -57,7 +57,15 @@ export default function App() {
   };
 
   // Helper untuk melakukan generate menggunakan Gemini (Mencoba Server, Fallback ke Browser Client-side)
-  const executeAIGenerate = async (prompt: string): Promise<string> => {
+  const executeAIGenerate = async (rawPrompt: string): Promise<string> => {
+    // Sisipkan aturan bahasa & istilah resmi sesuai CP Kemdikbudristek RI
+    const prompt = `${rawPrompt}
+
+[PANDUAN ISTILAH & GAYA BAHASA PENTING]:
+1. Gunakan istilah resmi Kurikulum Merdeka Kemdikbudristek RI secara konsisten (misalnya: "Fase", "Tujuan Pembelajaran (TP)", "Alur Tujuan Pembelajaran (ATP)", "Asesmen Formatif/Sumatif", "Kriteria Ketercapaian Tujuan Pembelajaran (KKTP)", "Profil Pelajar Pancasila").
+2. SESUAIKAN BAHASA: Sederhanakan bahasa dan penjelasan materi agar sesuai dengan jenjang usia/kelas siswa. JANGAN menggunakan istilah akademis yang terlalu rumit, abstrak, atau kalimat berbelit-belit untuk mata pelajaran sekolah.
+3. Kosakata, ilustrasi, studi kasus, instruksi tugas/LKPD, dan pertanyaan pemantik/asesmen harus ramah anak, mudah dicerna, komunikatif, konkret, dan dekat dengan kehidupan sehari-hari siswa.`;
+
     let keysToTry: string[] = [];
     let initialActiveIndex = 0;
 
