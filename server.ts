@@ -125,6 +125,20 @@ apiRouter.delete("/history/:id", (req, res) => {
   res.json({ success: true, message: "Riwayat berhasil dihapus" });
 });
 
+// 4.5. Restore History
+apiRouter.post("/history/restore", (req, res) => {
+  const { records } = req.body;
+  if (!Array.isArray(records)) {
+    return res.status(400).json({ error: "Format data tidak valid. 'records' harus berupa array." });
+  }
+  const saved = saveHistoryData(records);
+  if (saved) {
+    res.json({ success: true, message: "Database berhasil dipulihkan." });
+  } else {
+    res.status(500).json({ error: "Gagal memulihkan database." });
+  }
+});
+
 // 5. AI Generation Endpoint (Modul Ajar & LKPD)
 apiRouter.post("/generate", async (req, res) => {
   const { prompt, userApiKey } = req.body;
