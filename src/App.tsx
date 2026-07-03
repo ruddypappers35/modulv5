@@ -1176,21 +1176,26 @@ Gunakan CSS Tailwind bawaan yang ramah cetak (text-black, font-serif, border-bla
 
     TUGAS UTAMA:
     Buatlah Dokumen Program Tahunan (PROTA) dalam format JSON valid dengan dua properti utama:
-    1. "html": Kode HTML murni untuk cetak PROTA (menggunakan Times New Roman, tabel rapi dengan border, tanda tangan pengesahan di bawah).
+    1. "html": Kode HTML murni untuk cetak PROTA (menggunakan Times New Roman, tabel rapi dengan border, tanda tangan pengesahan di bawah). Pastikan tabel HTML tersebut memiliki kolom: No, Semester, Bab / Unit, Materi Pokok (Sub-Bab), Tujuan Pembelajaran (TP), Alokasi Waktu (JP), dan Profil Pelajar Pancasila.
     2. "json": Data terstruktur untuk tabel interaktif dengan format berikut:
        {
          "semester1": [
-           { "no": 1, "tp": "Deskripsi Tujuan Pembelajaran", "materi": "Nama Materi Pokok/Bab", "jp": 6, "dpl": "Profil Pelajar Pancasila", "keterangan": "" }
+           { "no": 1, "bab": "Bab 1: [Nama Bab]", "materi": "Nama Materi Pokok (Sub-Bab 1)", "tp": "Deskripsi Tujuan Pembelajaran 1", "jp": 6, "dpl": "Profil Pelajar Pancasila", "keterangan": "" },
+           { "no": 2, "bab": "Bab 1: [Nama Bab]", "materi": "Nama Materi Pokok (Sub-Bab 2)", "tp": "Deskripsi Tujuan Pembelajaran 2", "jp": 6, "dpl": "Profil Pelajar Pancasila", "keterangan": "" }
          ],
          "semester2": [
-           { "no": 5, "tp": "Deskripsi Tujuan Pembelajaran", "materi": "Nama Materi Pokok/Bab", "jp": 6, "dpl": "Profil Pelajar Pancasila", "keterangan": "" }
+           { "no": 5, "bab": "Bab 3: [Nama Bab]", "materi": "Nama Materi Pokok (Sub-Bab 1)", "tp": "Deskripsi Tujuan Pembelajaran 5", "jp": 6, "dpl": "Profil Pelajar Pancasila", "keterangan": "" }
          ]
        }
 
+    Ketentuan Materi Pokok & Bab:
+    - Analisis CP Utama: "${activeRecord.cp}" secara mendalam. Pecah menjadi beberapa Bab/Unit yang relevan untuk satu tahun ajaran penuh (Semester 1 dan Semester 2).
+    - Untuk setiap Bab/Unit, wajib dijabarkan menjadi BEBERAPA (minimal 2-3) Materi Pokok (Sub-Bab / Sub-Materi) yang logis dan saling berurutan beserta Tujuan Pembelajaran (TP) yang bersangkutan. JANGAN menggabungkan seluruh materi bab ke dalam satu baris tunggal. Setiap bab harus memiliki beberapa materi pokok dan TP terpisah.
+    - Sediakan alokasi JP yang proporsional untuk tiap materi pokok.
+
     Ketentuan Alokasi Waktu:
-    - Sediakan minimal 4 TP untuk Semester 1 (Semester Ganjil) dengan total alokasi waktu JP kumulatif tepat ${jpPerMinggu * mingguEfektifSem1} JP.
-    - Sediakan minimal 4 TP untuk Semester 2 (Semester Genap) dengan total alokasi waktu JP kumulatif tepat ${jpPerMinggu * mingguEfektifSem2} JP.
-    - Setiap baris harus memiliki deskripsi TP yang konkrit dan materi pokok yang logis sesuai CP: "${activeRecord.cp}".
+    - Sediakan minimal 4 baris/TP untuk Semester 1 (Semester Ganjil) dengan total alokasi waktu JP kumulatif tepat ${jpPerMinggu * mingguEfektifSem1} JP.
+    - Sediakan minimal 4 baris/TP untuk Semester 2 (Semester Genap) dengan total alokasi waktu JP kumulatif tepat ${jpPerMinggu * mingguEfektifSem2} JP.
 
     Perhatian Formatting:
     Berikan respon HANYA berupa JSON valid murni tanpa block markdown (\`\`\`json) atau teks pengantar lainnya agar dapat langsung di-parse menggunakan JSON.parse.`;
