@@ -16,21 +16,16 @@ import { AlertCircle, HelpCircle, CheckCircle, Info, RefreshCw, Sliders, Eye, Pe
 const originalFetch = window.fetch;
 window.fetch = async (input, init) => {
   const url = typeof input === "string" ? input : input.url;
+  let newInit = init ? { ...init } : {};
   if (url.includes("/api/") && !url.includes("/api/auth/check-email") && !url.includes("/api/admin/")) {
     const email = localStorage.getItem("userEmail") || "";
     if (email) {
-      init = init || {};
-      init.headers = init.headers || {};
-      if (init.headers instanceof Headers) {
-        init.headers.set("X-User-Email", email);
-      } else if (Array.isArray(init.headers)) {
-        init.headers.push(["X-User-Email", email]);
-      } else {
-        (init.headers as any)["X-User-Email"] = email;
-      }
+      const headers = newInit.headers ? { ...newInit.headers } : {};
+      (headers as any)["X-User-Email"] = email;
+      newInit.headers = headers;
     }
   }
-  return originalFetch(input, init);
+  return originalFetch(input, newInit);
 };
 
 export default function App() {
