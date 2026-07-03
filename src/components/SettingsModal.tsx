@@ -221,6 +221,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
           </div>
 
+          {/* Logout Section */}
+          <div className="border-t border-slate-200 pt-4 mt-2">
+            <button
+              onClick={() => {
+                if (window.confirm("Apakah Anda yakin ingin keluar dari akun email saat ini?")) {
+                  localStorage.removeItem("userEmail");
+                  window.location.reload();
+                }
+              }}
+              className="w-full bg-brand-rose/10 hover:bg-brand-rose/25 text-brand-rose font-extrabold text-xs uppercase tracking-wider py-2.5 px-4 rounded-xl border-2 border-brand-rose/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              Log Out / Ganti Akun Email
+            </button>
+          </div>
+
         </div>
       </div>
     </div>
