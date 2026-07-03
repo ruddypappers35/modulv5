@@ -13,6 +13,7 @@ interface BabSelectionModalProps {
   currentSemester: string;
   currentFase: string;
   userApiKey?: string;
+  userEmail?: string;
 }
 
 export const BabSelectionModal: React.FC<BabSelectionModalProps> = ({
@@ -23,7 +24,8 @@ export const BabSelectionModal: React.FC<BabSelectionModalProps> = ({
   currentKelas,
   currentSemester,
   currentFase,
-  userApiKey
+  userApiKey,
+  userEmail
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<string>("Semua");
@@ -110,6 +112,7 @@ export const BabSelectionModal: React.FC<BabSelectionModalProps> = ({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "X-User-Email": userEmail || ""
           },
           body: JSON.stringify({
             prompt,
