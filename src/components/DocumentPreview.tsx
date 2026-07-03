@@ -457,6 +457,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
               kktpGenerating={kktpGenerating}
               onGeneratePromes={onGeneratePromes}
               promesGenerating={promesGenerating}
+              onDownload={onDownload}
             />
           </div>
         )}
