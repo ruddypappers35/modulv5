@@ -17,7 +17,7 @@ export const Navbar: React.FC<NavbarProps> = ({ profile, onOpenProfile }) => {
           </div>
           <div>
             <h1 className="text-lg font-display font-black tracking-tight text-slate-900 flex items-center gap-1">
-              Gen ModulAjar <span className="text-brand-teal font-extrabold">•</span> <span className="text-slate-500 font-normal">RPP &amp; LKPD</span>
+              Buat ModulAjar
             </h1>
             <p className="text-slate-600 text-[11px] font-bold tracking-wide">
               Kurikulum Merdeka • Sesuai CP BSKAP Kemdikbudristek
