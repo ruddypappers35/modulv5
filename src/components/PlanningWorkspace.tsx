@@ -47,6 +47,7 @@ interface PlanningWorkspaceProps {
   kktpGenerating: boolean;
   onGeneratePromes: (protaJsonStr: string, semester: string, events?: PromesEvent[]) => Promise<void>;
   promesGenerating: boolean;
+  onDownload?: (specificTab?: string, specificSubTab?: string) => void;
 }
 
 export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
@@ -61,7 +62,8 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
   onGenerateKktp,
   kktpGenerating,
   onGeneratePromes,
-  promesGenerating
+  promesGenerating,
+  onDownload
 }) => {
   // Use props if provided, otherwise fallback to local state
   const [localSubTab, setLocalSubTab] = useState<"prota" | "kktp" | "promes">("prota");
@@ -394,33 +396,32 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                   </p>
                 </div>
               ) : editedProta ? (
-                <div className="bg-white border-2 border-slate-800 rounded-2xl p-4 sm:p-6 shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] flex flex-col h-full">
+                <div className="bg-card border-2 border-foreground rounded-xl p-6 shadow-brutal-sm flex flex-col h-full">
                   {/* Prota Header */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b-2 border-dashed border-slate-200 pb-4 mb-4">
-                    <div className="text-center sm:text-left">
-                      <h3 className="font-display font-black text-base text-slate-900 uppercase">PROGRAM TAHUNAN (PROTA)</h3>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
-                        {profile?.sekolah || "SMP Negeri 2 Tungkal Jaya"}
-                      </p>
-                      <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 mt-2">
-                        <span className="bg-[#FAF8F5] border border-slate-300 text-slate-700 text-[9px] font-bold px-2 py-0.5 rounded-full">{record.mapel}</span>
-                        <span className="bg-[#FAF8F5] border border-slate-300 text-slate-700 text-[9px] font-bold px-2 py-0.5 rounded-full">Kelas {record.kelas} ({record.fase})</span>
-                        <span className="bg-[#FAF8F5] border border-slate-300 text-slate-700 text-[9px] font-bold px-2 py-0.5 rounded-full">TA {profile?.tahun || "2025/2026"}</span>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-center flex-1">
+                      <h2 className="font-extrabold text-lg">PROGRAM TAHUNAN</h2>
+                      <p className="text-sm text-muted-foreground">{profile?.sekolah || "Sekolah Indonesia"}</p>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        <span>{record.mapel}</span>
+                        <span> | Kelas {record.kelas}</span>
+                        <span> | Fase {record.fase}</span>
+                        {profile?.tahun && <span> | TA {profile.tahun}</span>}
                       </div>
                     </div>
+                  </div>
 
-                    {/* Progress Modul */}
-                    <div className="w-full sm:w-44 text-xs font-semibold text-slate-700">
-                      <div className="flex justify-between text-[10px] font-black uppercase tracking-wider mb-1">
-                        <span>Progress Modul Ajar</span>
-                        <span className="text-brand-teal">{completedCount} / {totalTps} TP</span>
-                      </div>
-                      <div className="w-full h-3 bg-[#FAF8F5] rounded-full border-2 border-slate-800 p-0.5 overflow-hidden">
-                        <div 
-                          className="h-full bg-brand-teal rounded-full transition-all duration-500" 
-                          style={{ width: `${totalTps > 0 ? (completedCount / totalTps) * 100 : 0}%` }}
-                        ></div>
-                      </div>
+                  {/* Progress bar container */}
+                  <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-foreground/10">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-semibold text-muted-foreground">Progress Modul Ajar</span>
+                      <span className="text-xs font-bold text-primary">{completedCount}/{totalTps} TP</span>
+                    </div>
+                    <div aria-valuemax={100} aria-valuemin={0} role="progressbar" className="relative w-full overflow-hidden rounded-full bg-secondary h-2">
+                      <div 
+                        className="h-full bg-primary transition-all duration-500" 
+                        style={{ width: `${totalTps > 0 ? (completedCount / totalTps) * 100 : 0}%` }}
+                      ></div>
                     </div>
                   </div>
 
@@ -429,19 +430,30 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                     {isEditingProta ? (
                       <button
                         onClick={handleSaveProtaEdits}
-                        className="bg-brand-teal hover:bg-brand-teal/90 text-white font-extrabold text-[10px] uppercase tracking-wider py-1.5 px-3.5 border-2 border-slate-800 rounded-xl shadow-[1.5px_1.5px_0px_0px_rgba(30,41,59,1)] flex items-center gap-1.5 cursor-pointer"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3 border-2 border-foreground shadow-brutal-sm text-xs cursor-pointer"
                       >
-                        <Save className="h-3.5 w-3.5" />
+                        <Save className="w-4 h-4 mr-1" />
                         Simpan Perubahan
                       </button>
                     ) : (
-                      <button
-                        onClick={() => setIsEditingProta(true)}
-                        className="bg-white hover:bg-slate-50 text-slate-700 font-extrabold text-[10px] uppercase tracking-wider py-1.5 px-3.5 border-2 border-slate-800 rounded-xl shadow-[1.5px_1.5px_0px_0px_rgba(30,41,59,1)] flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <Edit3 className="h-3.5 w-3.5" />
-                        Edit Manual
-                      </button>
+                      <>
+                        <button
+                          onClick={() => setIsEditingProta(true)}
+                          className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 border-2 border-foreground shadow-brutal-sm text-xs cursor-pointer"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-pen-line w-4 h-4 mr-1"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path></svg>
+                          Edit
+                        </button>
+                        {onDownload && (
+                          <button
+                            onClick={() => onDownload("perencanaan", "prota")}
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3 border-2 border-foreground shadow-brutal-sm text-xs cursor-pointer"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-file-down w-4 h-4 mr-1"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M12 18v-6"></path><path d="m9 15 3 3 3-3"></path></svg>
+                            Download Prota (.docx)
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
 
@@ -449,37 +461,36 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                   <div className="space-y-6 flex-1 overflow-y-auto max-h-[400px] pr-1">
                     {/* Semester 1 Table */}
                     <div>
-                      <h4 className="font-display font-black text-xs text-brand-teal uppercase tracking-widest bg-brand-teal/10 px-3 py-1.5 rounded-t-xl border-2 border-slate-800 border-b-0 inline-block">
-                        SEMESTER 1 (GANJIL)
-                      </h4>
-                      <div className="overflow-x-auto border-2 border-slate-800 rounded-xl rounded-tl-none shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] bg-white">
-                        <table className="w-full text-[11px] text-slate-700 border-collapse">
+                      <h3 className="font-bold text-sm bg-primary/10 text-primary px-3 py-2 rounded-t-lg border-2 border-foreground/20 border-b-0">SEMESTER 1</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs border-2 border-foreground/20">
                           <thead>
-                            <tr className="bg-[#48997a] text-white border-b-2 border-slate-800 font-extrabold">
-                              <th className="px-2 py-2 w-8 text-center border-r border-slate-800">✓</th>
-                              <th className="px-2 py-2 w-8 text-center border-r border-slate-800">No</th>
-                              <th className="px-3 py-2 text-left border-r border-slate-800">Bab / Unit</th>
-                              <th className="px-3 py-2 text-left border-r border-slate-800">Materi Pokok</th>
-                              <th className="px-3 py-2 text-left border-r border-slate-800">Tujuan Pembelajaran</th>
-                              <th className="px-2 py-2 w-12 text-center border-r border-slate-800">JP</th>
-                              <th className="px-3 py-2 text-left border-r border-slate-800">Profil Pancasila (DPL)</th>
-                              <th className="px-2 py-2 w-24 text-center">Aksi</th>
+                            <tr className="bg-[#0D7C8F] text-white">
+                              <th className="border border-foreground/20 px-2 py-2 w-8">✓</th>
+                              <th className="border border-foreground/20 px-2 py-2 w-8">No</th>
+                              <th className="border border-foreground/20 px-2 py-2">Bab / Unit</th>
+                              <th className="border border-foreground/20 px-2 py-2">Tujuan Pembelajaran</th>
+                              <th className="border border-foreground/20 px-2 py-2">Materi Pokok</th>
+                              <th className="border border-foreground/20 px-2 py-2 w-14">JP</th>
+                              <th className="border border-foreground/20 px-2 py-2">Dimensi Profil Lulusan</th>
+                              <th className="border border-foreground/20 px-2 py-2">Keterangan</th>
+                              <th className="border border-foreground/20 px-2 py-2 w-24">Aksi</th>
                             </tr>
                           </thead>
                           <tbody>
                             {editedProta.semester1?.map((row: any, idx: number) => (
-                              <tr key={`sem1-${idx}`} className={`border-b border-slate-200 hover:bg-slate-50 ${completedTps[row.no] ? "bg-emerald-50/40 line-through text-slate-400" : ""}`}>
-                                <td className="px-2 py-2 text-center border-r border-slate-200">
+                              <tr key={`sem1-${idx}`} className={`hover:bg-muted/50 ${completedTps[row.no] ? "bg-emerald-50/40 line-through text-slate-400" : ""}`}>
+                                <td className="border border-foreground/20 px-2 py-2 text-center">
                                   <button onClick={() => handleToggleTp(row.no)} className="cursor-pointer text-slate-700 hover:text-brand-teal transition-all">
                                     {completedTps[row.no] ? (
-                                      <CheckSquare className="h-4 w-4 text-brand-teal" />
+                                      <CheckSquare className="h-4 w-4 text-brand-teal mx-auto" />
                                     ) : (
-                                      <Square className="h-4 w-4" />
+                                      <Square className="h-4 w-4 mx-auto" />
                                     )}
                                   </button>
                                 </td>
-                                <td className="px-2 py-2 text-center font-bold border-r border-slate-200">{row.no}</td>
-                                <td className="px-3 py-2 border-r border-slate-200 font-semibold text-slate-800">
+                                <td className="border border-foreground/20 px-2 py-2 text-center font-bold">{row.no}</td>
+                                <td className="border border-foreground/20 px-2 py-2 font-semibold">
                                   {isEditingProta ? (
                                     <input
                                       type="text"
@@ -491,19 +502,7 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                     row.bab || ""
                                   )}
                                 </td>
-                                <td className="px-3 py-2 border-r border-slate-200 font-semibold text-slate-900">
-                                  {isEditingProta ? (
-                                    <input
-                                      type="text"
-                                      value={row.materi}
-                                      onChange={(e) => handleProtaFieldChange("semester1", idx, "materi", e.target.value)}
-                                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded p-1 font-sans text-[10px] focus:outline-none"
-                                    />
-                                  ) : (
-                                    row.materi
-                                  )}
-                                </td>
-                                <td className="px-3 py-2 border-r border-slate-200 text-justify">
+                                <td className="border border-foreground/20 px-2 py-2">
                                   {isEditingProta ? (
                                     <textarea
                                       value={row.tp}
@@ -515,7 +514,19 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                     row.tp
                                   )}
                                 </td>
-                                <td className="px-2 py-2 text-center font-black border-r border-slate-200 text-brand-teal">
+                                <td className="border border-foreground/20 px-2 py-2 font-semibold">
+                                  {isEditingProta ? (
+                                    <input
+                                      type="text"
+                                      value={row.materi}
+                                      onChange={(e) => handleProtaFieldChange("semester1", idx, "materi", e.target.value)}
+                                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded p-1 font-sans text-[10px] focus:outline-none"
+                                    />
+                                  ) : (
+                                    row.materi
+                                  )}
+                                </td>
+                                <td className="border border-foreground/20 px-2 py-2 text-center font-bold">
                                   {isEditingProta ? (
                                     <input
                                       type="number"
@@ -527,7 +538,7 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                     row.jp
                                   )}
                                 </td>
-                                <td className="px-3 py-2 border-r border-slate-200 text-[10px] text-slate-600 font-medium">
+                                <td className="border border-foreground/20 px-2 py-2">
                                   {isEditingProta ? (
                                     <input
                                       type="text"
@@ -539,25 +550,36 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                     row.dpl
                                   )}
                                 </td>
-                                <td className="px-2 py-2 text-center">
+                                <td className="border border-foreground/20 px-2 py-2">
+                                  {isEditingProta ? (
+                                    <input
+                                      type="text"
+                                      value={row.keterangan || ""}
+                                      onChange={(e) => handleProtaFieldChange("semester1", idx, "keterangan", e.target.value)}
+                                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded p-1 font-sans text-[10px] focus:outline-none"
+                                    />
+                                  ) : (
+                                    row.keterangan || ""
+                                  )}
+                                </td>
+                                <td className="border border-foreground/20 px-2 py-2 text-center">
                                   <button
                                     onClick={() => onSelectTpRow(row.tp, row.materi, "Semester 1")}
-                                    className="bg-white hover:bg-brand-teal hover:text-white text-brand-teal border border-brand-teal/40 font-extrabold text-[9px] uppercase tracking-wider py-1 px-2.5 rounded-lg transition-all flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border bg-background hover:text-accent-foreground rounded-md h-6 text-[10px] px-2 border-primary/50 text-primary hover:bg-primary/10 cursor-pointer mx-auto"
                                   >
-                                    <span>Buat Modul</span>
-                                    <ArrowRight className="h-3 w-3" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-file-text w-3 h-3 mr-1"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+                                    Buat Modul
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-arrow-right w-3 h-3 ml-1"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
                                   </button>
                                 </td>
                               </tr>
                             ))}
-                            <tr className="bg-[#FAF8F5] font-black border-t-2 border-slate-800 text-[11px]">
-                              <td colSpan={5} className="px-3 py-2.5 text-right border-r border-slate-200 uppercase tracking-wider text-slate-500">
-                                Total JP Dialokasikan (Target: {totalJpSem1} JP)
+                            <tr className="bg-muted/30 font-bold">
+                              <td colSpan={5} className="border border-foreground/20 px-2 py-2 text-right">Total JP Semester 1</td>
+                              <td className="border border-foreground/20 px-2 py-2 text-center">
+                                {editedProta.semester1?.reduce((acc: number, x: any) => acc + (Number(x.jp) || 0), 0)}
                               </td>
-                              <td className="px-2 py-2.5 text-center text-brand-teal font-extrabold border-r border-slate-200 text-xs">
-                                {editedProta.semester1?.reduce((acc: number, x: any) => acc + (Number(x.jp) || 0), 0)} JP
-                              </td>
-                              <td colSpan={2} className="px-3 py-2.5"></td>
+                              <td colSpan={3} className="border border-foreground/20 px-2 py-2"></td>
                             </tr>
                           </tbody>
                         </table>
@@ -566,37 +588,36 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
 
                     {/* Semester 2 Table */}
                     <div>
-                      <h4 className="font-display font-black text-xs text-brand-teal uppercase tracking-widest bg-brand-teal/10 px-3 py-1.5 rounded-t-xl border-2 border-slate-800 border-b-0 inline-block">
-                        SEMESTER 2 (GENAP)
-                      </h4>
-                      <div className="overflow-x-auto border-2 border-slate-800 rounded-xl rounded-tl-none shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] bg-white">
-                        <table className="w-full text-[11px] text-slate-700 border-collapse">
+                      <h3 className="font-bold text-sm bg-primary/10 text-primary px-3 py-2 rounded-t-lg border-2 border-foreground/20 border-b-0">SEMESTER 2</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs border-2 border-foreground/20">
                           <thead>
-                            <tr className="bg-[#48997a] text-white border-b-2 border-slate-800 font-extrabold">
-                              <th className="px-2 py-2 w-8 text-center border-r border-slate-800">✓</th>
-                              <th className="px-2 py-2 w-8 text-center border-r border-slate-800">No</th>
-                              <th className="px-3 py-2 text-left border-r border-slate-800">Bab / Unit</th>
-                              <th className="px-3 py-2 text-left border-r border-slate-800">Materi Pokok</th>
-                              <th className="px-3 py-2 text-left border-r border-slate-800">Tujuan Pembelajaran</th>
-                              <th className="px-2 py-2 w-12 text-center border-r border-slate-800">JP</th>
-                              <th className="px-3 py-2 text-left border-r border-slate-800">Profil Pancasila (DPL)</th>
-                              <th className="px-2 py-2 w-24 text-center">Aksi</th>
+                            <tr className="bg-[#0D7C8F] text-white">
+                              <th className="border border-foreground/20 px-2 py-2 w-8">✓</th>
+                              <th className="border border-foreground/20 px-2 py-2 w-8">No</th>
+                              <th className="border border-foreground/20 px-2 py-2">Bab / Unit</th>
+                              <th className="border border-foreground/20 px-2 py-2">Tujuan Pembelajaran</th>
+                              <th className="border border-foreground/20 px-2 py-2">Materi Pokok</th>
+                              <th className="border border-foreground/20 px-2 py-2 w-14">JP</th>
+                              <th className="border border-foreground/20 px-2 py-2">Dimensi Profil Lulusan</th>
+                              <th className="border border-foreground/20 px-2 py-2">Keterangan</th>
+                              <th className="border border-foreground/20 px-2 py-2 w-24">Aksi</th>
                             </tr>
                           </thead>
                           <tbody>
                             {editedProta.semester2?.map((row: any, idx: number) => (
-                              <tr key={`sem2-${idx}`} className={`border-b border-slate-200 hover:bg-slate-50 ${completedTps[row.no] ? "bg-emerald-50/40 line-through text-slate-400" : ""}`}>
-                                <td className="px-2 py-2 text-center border-r border-slate-200">
+                              <tr key={`sem2-${idx}`} className={`hover:bg-muted/50 ${completedTps[row.no] ? "bg-emerald-50/40 line-through text-slate-400" : ""}`}>
+                                <td className="border border-foreground/20 px-2 py-2 text-center">
                                   <button onClick={() => handleToggleTp(row.no)} className="cursor-pointer text-slate-700 hover:text-brand-teal transition-all">
                                     {completedTps[row.no] ? (
-                                      <CheckSquare className="h-4 w-4 text-brand-teal" />
+                                      <CheckSquare className="h-4 w-4 text-brand-teal mx-auto" />
                                     ) : (
-                                      <Square className="h-4 w-4" />
+                                      <Square className="h-4 w-4 mx-auto" />
                                     )}
                                   </button>
                                 </td>
-                                <td className="px-2 py-2 text-center font-bold border-r border-slate-200">{row.no}</td>
-                                <td className="px-3 py-2 border-r border-slate-200 font-semibold text-slate-800">
+                                <td className="border border-foreground/20 px-2 py-2 text-center font-bold">{row.no}</td>
+                                <td className="border border-foreground/20 px-2 py-2 font-semibold">
                                   {isEditingProta ? (
                                     <input
                                       type="text"
@@ -608,19 +629,7 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                     row.bab || ""
                                   )}
                                 </td>
-                                <td className="px-3 py-2 border-r border-slate-200 font-semibold text-slate-900">
-                                  {isEditingProta ? (
-                                    <input
-                                      type="text"
-                                      value={row.materi}
-                                      onChange={(e) => handleProtaFieldChange("semester2", idx, "materi", e.target.value)}
-                                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded p-1 font-sans text-[10px] focus:outline-none"
-                                    />
-                                  ) : (
-                                    row.materi
-                                  )}
-                                </td>
-                                <td className="px-3 py-2 border-r border-slate-200 text-justify">
+                                <td className="border border-foreground/20 px-2 py-2">
                                   {isEditingProta ? (
                                     <textarea
                                       value={row.tp}
@@ -632,7 +641,19 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                     row.tp
                                   )}
                                 </td>
-                                <td className="px-2 py-2 text-center font-black border-r border-slate-200 text-brand-teal">
+                                <td className="border border-foreground/20 px-2 py-2 font-semibold">
+                                  {isEditingProta ? (
+                                    <input
+                                      type="text"
+                                      value={row.materi}
+                                      onChange={(e) => handleProtaFieldChange("semester2", idx, "materi", e.target.value)}
+                                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded p-1 font-sans text-[10px] focus:outline-none"
+                                    />
+                                  ) : (
+                                    row.materi
+                                  )}
+                                </td>
+                                <td className="border border-foreground/20 px-2 py-2 text-center font-bold">
                                   {isEditingProta ? (
                                     <input
                                       type="number"
@@ -644,7 +665,7 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                     row.jp
                                   )}
                                 </td>
-                                <td className="px-3 py-2 border-r border-slate-200 text-[10px] text-slate-600 font-medium">
+                                <td className="border border-foreground/20 px-2 py-2">
                                   {isEditingProta ? (
                                     <input
                                       type="text"
@@ -656,25 +677,36 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                     row.dpl
                                   )}
                                 </td>
-                                <td className="px-2 py-2 text-center">
+                                <td className="border border-foreground/20 px-2 py-2">
+                                  {isEditingProta ? (
+                                    <input
+                                      type="text"
+                                      value={row.keterangan || ""}
+                                      onChange={(e) => handleProtaFieldChange("semester2", idx, "keterangan", e.target.value)}
+                                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded p-1 font-sans text-[10px] focus:outline-none"
+                                    />
+                                  ) : (
+                                    row.keterangan || ""
+                                  )}
+                                </td>
+                                <td className="border border-foreground/20 px-2 py-2 text-center">
                                   <button
                                     onClick={() => onSelectTpRow(row.tp, row.materi, "Semester 2")}
-                                    className="bg-white hover:bg-brand-teal hover:text-white text-brand-teal border border-brand-teal/40 font-extrabold text-[9px] uppercase tracking-wider py-1 px-2.5 rounded-lg transition-all flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border bg-background hover:text-accent-foreground rounded-md h-6 text-[10px] px-2 border-primary/50 text-primary hover:bg-primary/10 cursor-pointer mx-auto"
                                   >
-                                    <span>Buat Modul</span>
-                                    <ArrowRight className="h-3 w-3" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-file-text w-3 h-3 mr-1"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+                                    Buat Modul
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-arrow-right w-3 h-3 ml-1"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
                                   </button>
                                 </td>
                               </tr>
                             ))}
-                            <tr className="bg-[#FAF8F5] font-black border-t-2 border-slate-800 text-[11px]">
-                              <td colSpan={5} className="px-3 py-2.5 text-right border-r border-slate-200 uppercase tracking-wider text-slate-500">
-                                Total JP Dialokasikan (Target: {totalJpSem2} JP)
+                            <tr className="bg-muted/30 font-bold">
+                              <td colSpan={5} className="border border-foreground/20 px-2 py-2 text-right">Total JP Semester 2</td>
+                              <td className="border border-foreground/20 px-2 py-2 text-center">
+                                {editedProta.semester2?.reduce((acc: number, x: any) => acc + (Number(x.jp) || 0), 0)}
                               </td>
-                              <td className="px-2 py-2.5 text-center text-brand-teal font-extrabold border-r border-slate-200 text-xs">
-                                {editedProta.semester2?.reduce((acc: number, x: any) => acc + (Number(x.jp) || 0), 0)} JP
-                              </td>
-                              <td colSpan={2} className="px-3 py-2.5"></td>
+                              <td colSpan={3} className="border border-foreground/20 px-2 py-2"></td>
                             </tr>
                           </tbody>
                         </table>
@@ -682,16 +714,17 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                     </div>
 
                     {/* Signatures section preview */}
-                    <div className="border-t border-slate-200 pt-6 mt-6 grid grid-cols-2 text-[10px] text-slate-600 font-bold px-2">
+                    <div className="mt-6 text-xs text-muted-foreground grid grid-cols-2 gap-4">
                       <div>
-                        <p className="uppercase tracking-wide text-slate-400 text-[8px] mb-1">Penyusun</p>
-                        <p className="text-slate-900 font-extrabold text-[11px]">{profile?.guru || "Rudy Susanto, S.Pd"}</p>
-                        <p className="text-slate-500 font-mono">NIP. {profile?.nipGuru || "199505052023211010"}</p>
+                        <p className="font-bold">Penyusun,</p>
+                        <p className="mt-8">{profile?.guru || "Rudy Susanto, S.Pd"}</p>
+                        <p>NIP. {profile?.nipGuru || "199505052023211010"}</p>
                       </div>
                       <div className="text-right">
-                        <p className="uppercase tracking-wide text-slate-400 text-[8px] mb-1">Mengetahui</p>
-                        <p className="text-slate-900 font-extrabold text-[11px]">{profile?.kepsek || "Budi Raharjo, S.Pd., M.Si"}</p>
-                        <p className="text-slate-500 font-mono">NIP. {profile?.nipKepsek || "197203151998031002"}</p>
+                        <p className="font-bold">Mengetahui,</p>
+                        <p>Kepala Sekolah</p>
+                        <p className="mt-8">{profile?.kepsek || "Budi Raharjo, S.Pd., M.Si"}</p>
+                        {profile?.nipKepsek && <p>NIP. {profile.nipKepsek}</p>}
                       </div>
                     </div>
                   </div>
