@@ -7,8 +7,31 @@ import { DocumentPreview } from "./components/DocumentPreview";
 import { ProfileModal } from "./components/ProfileModal";
 import { BabSelectionModal } from "./components/BabSelectionModal";
 import { SettingsModal } from "./components/SettingsModal";
+import { UserLogin } from "./components/UserLogin";
+import { AdminPanel } from "./components/AdminPanel";
 import { GuruProfile, ModulRecord, CurriculumBab } from "./types";
 import { AlertCircle, HelpCircle, CheckCircle, Info, RefreshCw, Sliders, Eye, PenTool } from "lucide-react";
+
+// Global Fetch Interceptor for X-User-Email header injection
+const originalFetch = window.fetch;
+window.fetch = async (input, init) => {
+  const url = typeof input === "string" ? input : input.url;
+  if (url.includes("/api/") && !url.includes("/api/auth/check-email") && !url.includes("/api/admin/")) {
+    const email = localStorage.getItem("userEmail") || "";
+    if (email) {
+      init = init || {};
+      init.headers = init.headers || {};
+      if (init.headers instanceof Headers) {
+        init.headers.set("X-User-Email", email);
+      } else if (Array.isArray(init.headers)) {
+        init.headers.push(["X-User-Email", email]);
+      } else {
+        (init.headers as any)["X-User-Email"] = email;
+      }
+    }
+  }
+  return originalFetch(input, init);
+};
 
 export default function App() {
   const [profile, setProfile] = useState<GuruProfile | null>(null);
@@ -23,6 +46,10 @@ export default function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isBabSelectionOpen, setIsBabSelectionOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
+  // Auth state
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [lkpdGenerating, setLkpdGenerating] = useState(false);
@@ -214,31 +241,61 @@ export default function App() {
     throw new Error("Semua API Key yang terkonfigurasi mengalami limitasi quota. Silakan tunggu beberapa menit lagi atau tambahkan API Key baru.");
   };
 
-  // Muat data profil dari LocalStorage
+  // Check auth whitelist and load credentials on mount
   useEffect(() => {
+    // 1. Muat data profil dari LocalStorage
     const saved = localStorage.getItem("guruProfile");
     if (saved) {
       try {
         const p = JSON.parse(saved);
-        
-        // Normalize apiKeys in case older versions stored objects like {provider, key, label}
         if (Array.isArray(p.apiKeys)) {
           p.apiKeys = p.apiKeys.map((k: any) => typeof k === 'string' ? k : (k.key || String(k)));
         }
-        
         setProfile(p);
         setFormValues((prev) => ({ ...prev, mapel: p.mapel }));
       } catch (e) {
         console.error("Gagal membaca profil dari localStorage", e);
       }
     } else {
-      // Buka modal profil otomatis jika baru pertama kali masuk
       setIsProfileOpen(true);
+    }
+
+    // 2. Check Whitelist Routing & Auth
+    if (window.location.pathname === "/admin") {
+      setAuthChecked(true);
+      return;
+    }
+
+    const email = localStorage.getItem("userEmail");
+    if (email) {
+      fetch("/api/auth/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase() })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setUserEmail(data.email);
+        } else {
+          localStorage.removeItem("userEmail");
+          setUserEmail(null);
+        }
+        setAuthChecked(true);
+      })
+      .catch(() => {
+        // Offline/No Server Connection Fallback
+        setUserEmail(email);
+        setAuthChecked(true);
+      });
+    } else {
+      setAuthChecked(true);
     }
   }, []);
 
   // Muat Riwayat dari Server Express API
   const fetchHistory = async () => {
+    if (!userEmail) return;
     setHistoryLoading(true);
     try {
       const response = await fetch("/api/history");
@@ -251,7 +308,6 @@ export default function App() {
       }
     } catch (e) {
       console.warn("Server API offline atau gagal terhubung, menggunakan fallback localStorage", e);
-      // Fallback ke localStorage
       const savedHistory = localStorage.getItem("modulHistory");
       if (savedHistory) {
         try {
@@ -266,8 +322,10 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchHistory();
-  }, []);
+    if (userEmail) {
+      fetchHistory();
+    }
+  }, [userEmail]);
 
   // Simpan/Update Profil Guru & API Key
   const handleSaveProfile = (updatedProfile: GuruProfile) => {
@@ -1705,6 +1763,26 @@ Gunakan CSS Tailwind bawaan yang ramah cetak (text-black, font-serif, border-bla
   };
 
   console.log("Rendering App component...");
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 text-brand-teal border-4 border-slate-900 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (window.location.pathname === "/admin") {
+    return <AdminPanel />;
+  }
+
+  if (!userEmail) {
+    return <UserLogin onLoginSuccess={(email) => {
+      setUserEmail(email);
+      localStorage.setItem("userEmail", email);
+    }} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF8F5] flex flex-col text-slate-900 antialiased selection:bg-brand-cream">
       <Navbar profile={profile} onOpenProfile={() => setIsProfileOpen(true)} onOpenSettings={() => setIsSettingsOpen(true)} />
@@ -1858,6 +1936,7 @@ Gunakan CSS Tailwind bawaan yang ramah cetak (text-black, font-serif, border-bla
         currentSemester={formValues.semester}
         currentFase={formValues.fase}
         userApiKey={profile?.userApiKey}
+        userEmail={userEmail || undefined}
       />
 
       {/* Settings Modal */}
