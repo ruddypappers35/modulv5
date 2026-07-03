@@ -27,12 +27,19 @@ export const UserLogin: React.FC<UserLoginProps> = ({ onLoginSuccess }) => {
         body: JSON.stringify({ email: email.trim().toLowerCase() })
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get("Content-Type") || "";
+      let data;
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error(`Status ${response.status}: ${text.substring(0, 100) || "Respon kosong"}`);
+      }
 
       if (response.ok && data.success) {
         onLoginSuccess(data.email);
       } else {
-        setError(data.error || "Email Anda belum terdaftar dalam sistem.");
+        setError(data?.error || "Email Anda belum terdaftar dalam sistem.");
       }
     } catch (err: any) {
       console.error(err);
