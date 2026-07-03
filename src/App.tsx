@@ -1784,10 +1784,11 @@ Gunakan CSS Tailwind bawaan yang ramah cetak (text-black, font-serif, border-bla
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t-2 border-slate-800 py-8 text-center text-xs mt-12">
+      <footer className="bg-white border-t-2 border-slate-800 py-4 text-center text-xs mt-12">
         <div className="max-w-[1440px] 2xl:max-w-[1536px] mx-auto px-4">
-          <p className="font-black text-slate-950 font-sans uppercase tracking-wider">© 2026 GenModul AI • Berbasis Kecerdasan Buatan (Gemini 3.5 Flash)</p>
-          <p className="mt-2 text-brand-teal font-black uppercase tracking-widest font-sans">Dikembangkan untuk mendukung program digitalisasi sekolah Indonesia</p>
+          <p className="font-semibold text-slate-600 font-sans">
+            © 2026 GenModul AI • Created by Rudy Susanto
+          </p>
         </div>
       </footer>
 
