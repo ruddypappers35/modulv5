@@ -458,7 +458,7 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                   </div>
 
                   {/* Tables Container */}
-                  <div className="space-y-6 flex-1 overflow-y-auto max-h-[400px] pr-1">
+                  <div className="space-y-6 flex-1">
                     {/* Semester 1 Table */}
                     <div>
                       <h3 className="font-bold text-sm bg-primary/10 text-primary px-3 py-2 rounded-t-lg border-2 border-foreground/20 border-b-0">SEMESTER 1</h3>
