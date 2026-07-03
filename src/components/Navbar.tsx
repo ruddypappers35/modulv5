@@ -5,9 +5,10 @@ import { GuruProfile } from "../types";
 interface NavbarProps {
   profile: GuruProfile | null;
   onOpenProfile: () => void;
+  onOpenSettings: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ profile, onOpenProfile }) => {
+export const Navbar: React.FC<NavbarProps> = ({ profile, onOpenProfile, onOpenSettings }) => {
   return (
     <header className="bg-white border-b-2 border-slate-800 text-slate-900 sticky top-0 z-40">
       <div className="max-w-[1440px] 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -39,6 +40,14 @@ export const Navbar: React.FC<NavbarProps> = ({ profile, onOpenProfile }) => {
             className="flex items-center justify-center bg-brand-cream hover:bg-brand-cream/80 active:bg-brand-cream/90 border-2 border-slate-800 text-slate-900 h-10 w-10 rounded-xl shadow-[2.5px_2.5px_0px_0px_rgba(30,41,59,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all cursor-pointer"
           >
             <User className="h-5 w-5 text-slate-900" />
+          </button>
+          <button
+            onClick={onOpenSettings}
+            id="btn-open-settings"
+            title="Pengaturan Aplikasi"
+            className="flex items-center justify-center bg-brand-cream hover:bg-brand-cream/80 active:bg-brand-cream/90 border-2 border-slate-800 text-slate-900 h-10 w-10 rounded-xl shadow-[2.5px_2.5px_0px_0px_rgba(30,41,59,1)] hover:-translate-y-0.5 hover:-translate-x-0.5 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all cursor-pointer"
+          >
+            <Settings className="h-5 w-5 text-slate-900" />
           </button>
         </div>
       </div>
