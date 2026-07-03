@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Save, Key, Eye, EyeOff, User, AlertCircle, Info, Plus, Trash2 } from "lucide-react";
+import { X, Save, Key, Eye, EyeOff, User, AlertCircle, Info, Plus, Trash2, Edit2, Copy, Check } from "lucide-react";
 import { GuruProfile } from "../types";
 
 interface ProfileModalProps {
@@ -30,6 +30,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   const [showApiKey, setShowApiKey] = useState(false);
   const [newKeyInput, setNewKeyInput] = useState("");
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingValue, setEditingValue] = useState("");
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (currentProfile) {
@@ -66,6 +69,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         activeApiKeyIndex: 0
       });
     }
+    // Reset editing/copying states
+    setEditingIndex(null);
+    setEditingValue("");
+    setCopiedIndex(null);
   }, [currentProfile, isOpen]);
 
   if (!isOpen) return null;
@@ -129,6 +136,41 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         activeApiKeyIndex: index,
         userApiKey: existingKeys[index] || ""
       };
+    });
+  };
+
+  const handleStartEdit = (index: number, value: string) => {
+    setEditingIndex(index);
+    setEditingValue(value);
+  };
+
+  const handleSaveEdit = (indexToUpdate: number) => {
+    const trimmed = editingValue.trim();
+    if (!trimmed) return;
+    
+    setFormData((prev) => {
+      const existingKeys = prev.apiKeys || [];
+      const updatedKeys = [...existingKeys];
+      updatedKeys[indexToUpdate] = trimmed;
+      
+      const activeIdx = prev.activeApiKeyIndex !== undefined ? prev.activeApiKeyIndex : 0;
+      
+      return {
+        ...prev,
+        apiKeys: updatedKeys,
+        userApiKey: updatedKeys[activeIdx] || ""
+      };
+    });
+    setEditingIndex(null);
+    setEditingValue("");
+  };
+
+  const handleCopyKey = (key: string, index: number) => {
+    navigator.clipboard.writeText(key).then(() => {
+      setCopiedIndex(index);
+      setTimeout(() => {
+        setCopiedIndex(null);
+      }, 2000);
     });
   };
 
@@ -217,7 +259,49 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   const displayKey = safeKey.length > 12 
                     ? `${safeKey.slice(0, 8)}...${safeKey.slice(-4)}`
                     : safeKey;
+                  const isEditing = editingIndex === index;
                   
+                  if (isEditing) {
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 p-2 rounded-xl border-2 bg-white border-slate-800 shadow-[1.5px_1.5px_0px_0px_rgba(30,41,59,1)]"
+                      >
+                        <input
+                          type="text"
+                          value={editingValue}
+                          onChange={(e) => setEditingValue(e.target.value)}
+                          className="flex-1 px-2 py-1 bg-white border border-slate-400 rounded-lg text-xs focus:outline-none focus:border-brand-teal font-mono font-bold"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleSaveEdit(index);
+                            } else if (e.key === "Escape") {
+                              setEditingIndex(null);
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSaveEdit(index)}
+                          className="text-brand-teal hover:text-brand-teal/80 p-1 rounded-lg transition-colors cursor-pointer"
+                          title="Simpan"
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingIndex(null)}
+                          className="text-slate-400 hover:text-brand-rose p-1 rounded-lg transition-colors cursor-pointer"
+                          title="Batal"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div
                       key={index}
@@ -230,29 +314,51 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleSetActiveApiKey(index)}
-                        className="flex items-center gap-2 flex-1 text-left cursor-pointer"
+                        className="flex items-center gap-2 flex-1 text-left cursor-pointer mr-2 overflow-hidden"
                       >
                         <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${
                           isActive ? "border-brand-teal bg-brand-teal" : "border-slate-400 bg-white"
                         }`}>
                           {isActive && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
                         </div>
-                        <div className="flex flex-col">
-                          <span className="font-mono text-xs font-bold text-slate-800">{displayKey}</span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-mono text-xs font-bold text-slate-800 truncate">{displayKey}</span>
                           <span className="text-[9px] font-sans font-bold text-slate-400 uppercase tracking-wider">
                             {isActive ? "Aktif & Prioritas Utama" : `API Key #${index + 1}`}
                           </span>
                         </div>
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteApiKey(index)}
-                        className="text-slate-400 hover:text-brand-rose p-1 rounded-lg transition-colors cursor-pointer"
-                        title="Hapus API Key"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleCopyKey(safeKey, index)}
+                          className="text-slate-400 hover:text-brand-teal p-1 rounded-lg transition-colors cursor-pointer"
+                          title="Copy API Key"
+                        >
+                          {copiedIndex === index ? (
+                            <Check className="h-4 w-4 text-brand-teal" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleStartEdit(index, safeKey)}
+                          className="text-slate-400 hover:text-brand-teal p-1 rounded-lg transition-colors cursor-pointer"
+                          title="Edit API Key"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteApiKey(index)}
+                          className="text-slate-400 hover:text-brand-rose p-1 rounded-lg transition-colors cursor-pointer"
+                          title="Hapus API Key"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   );
                 })
