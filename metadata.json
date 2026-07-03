@@ -1,0 +1,6 @@
+{
+  "name": "Generator Modul Ajar dan LKPD",
+  "description": "Aplikasi pembantu guru untuk menghasilkan RPP / Modul Ajar Kurikulum Merdeka dan Lembar Kerja Peserta Didik (LKPD) terformat tabel Microsoft Word menggunakan Gemini AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

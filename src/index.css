@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-primary-50: #f8fafc;
+  --color-primary-100: #f1f5f9;
+  --color-primary-200: #e2e8f0;
+  --color-primary-300: #cbd5e1;
+  --color-primary-400: #94a3b8;
+  --color-primary-500: #64748b;
+  --color-primary-600: #475569;
+  --color-primary-700: #334155;
+  --color-primary-800: #1e293b;
+  --color-primary-900: #0f172a;
+
+  /* Custom Color Hunt Palette */
+  --color-brand-teal: #59B292;
+  --color-brand-yellow: #FFC94D;
+  --color-brand-cream: #FAE7CB;
+  --color-brand-rose: #FA6781;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #FAF8F5; /* Cozy off-white cream background matching the palette */
+  color: #1e293b;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* MS Word Table Preview Simulation Styling */
+.preview-area {
+  font-family: 'Times New Roman', Times, serif;
+  color: #000;
+}
+.preview-area table {
+  width: 100% !important;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+.preview-area td, .preview-area th {
+  border: 1px solid black;
+  padding: 8px;
+  vertical-align: top;
+}
+
