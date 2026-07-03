@@ -54,7 +54,14 @@ export const AdminPanel: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
       });
-      const data = await response.json();
+      const contentType = response.headers.get("Content-Type") || "";
+      let data;
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error(`Status ${response.status}: ${text.substring(0, 100) || "Respon kosong"}`);
+      }
 
       if (response.ok && data.success) {
         setToken(data.token);
@@ -62,7 +69,7 @@ export const AdminPanel: React.FC = () => {
         sessionStorage.setItem("adminToken", data.token);
         fetchEmails(data.token);
       } else {
-        setError(data.error || "Login gagal. Username atau password salah.");
+        setError(data?.error || "Login gagal. Username atau password salah.");
       }
     } catch (err: any) {
       setError("Koneksi gagal terhubung ke server: " + (err.message || JSON.stringify(err) || "Koneksi terputus."));
