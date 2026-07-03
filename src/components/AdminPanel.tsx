@@ -64,8 +64,8 @@ export const AdminPanel: React.FC = () => {
       } else {
         setError(data.error || "Login gagal. Username atau password salah.");
       }
-    } catch (err) {
-      setError("Koneksi gagal terhubung ke server.");
+    } catch (err: any) {
+      setError("Koneksi gagal terhubung ke server: " + (err.message || JSON.stringify(err) || "Koneksi terputus."));
     } finally {
       setLoading(false);
     }
