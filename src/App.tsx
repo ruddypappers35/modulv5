@@ -1800,7 +1800,7 @@ Gunakan CSS Tailwind bawaan yang ramah cetak (text-black, font-serif, border-bla
       />
 
       {/* Bab Selection Modal */}
-      {/* <BabSelectionModal
+      <BabSelectionModal
         isOpen={isBabSelectionOpen}
         onClose={() => setIsBabSelectionOpen(false)}
         onSelect={handleSelectBab}
@@ -1809,7 +1809,7 @@ Gunakan CSS Tailwind bawaan yang ramah cetak (text-black, font-serif, border-bla
         currentSemester={formValues.semester}
         currentFase={formValues.fase}
         userApiKey={profile?.userApiKey}
-      /> */}
+      />
     </div>
   );
 }
