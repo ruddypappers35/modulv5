@@ -83,6 +83,7 @@ export const BabSelectionModal: React.FC<BabSelectionModalProps> = ({
     Fase: "${fase}"
 
     Harap buat daftar 4 bab resmi kurikulum merdeka yang paling relevan dengan deskripsi materi pokok yang mendalam.
+    Gunakan istilah resmi sesuai panduan Capaian Pembelajaran (CP) Kemdikbudristek RI secara konsisten, dan sederhanakan bahasa agar ramah anak serta sesuai untuk jenjang kelas/fase tersebut. Hindari menggunakan istilah akademis yang terlalu rumit.
     Kembalikan HASILNYA HANYA berupa JSON array murni tanpa tag markdown \`\`\`json atau teks pengantar lainnya agar bisa langsung di-JSON.parse() di frontend.
     
     Format JSON harus berupa array of objects seperti ini:
