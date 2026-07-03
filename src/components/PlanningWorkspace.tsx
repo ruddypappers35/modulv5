@@ -458,8 +458,9 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                             <tr className="bg-[#48997a] text-white border-b-2 border-slate-800 font-extrabold">
                               <th className="px-2 py-2 w-8 text-center border-r border-slate-800">✓</th>
                               <th className="px-2 py-2 w-8 text-center border-r border-slate-800">No</th>
-                              <th className="px-3 py-2 text-left border-r border-slate-800">Tujuan Pembelajaran</th>
+                              <th className="px-3 py-2 text-left border-r border-slate-800">Bab / Unit</th>
                               <th className="px-3 py-2 text-left border-r border-slate-800">Materi Pokok</th>
+                              <th className="px-3 py-2 text-left border-r border-slate-800">Tujuan Pembelajaran</th>
                               <th className="px-2 py-2 w-12 text-center border-r border-slate-800">JP</th>
                               <th className="px-3 py-2 text-left border-r border-slate-800">Profil Pancasila (DPL)</th>
                               <th className="px-2 py-2 w-24 text-center">Aksi</th>
@@ -478,16 +479,16 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                   </button>
                                 </td>
                                 <td className="px-2 py-2 text-center font-bold border-r border-slate-200">{row.no}</td>
-                                <td className="px-3 py-2 border-r border-slate-200 text-justify">
+                                <td className="px-3 py-2 border-r border-slate-200 font-semibold text-slate-800">
                                   {isEditingProta ? (
-                                    <textarea
-                                      value={row.tp}
-                                      onChange={(e) => handleProtaFieldChange("semester1", idx, "tp", e.target.value)}
+                                    <input
+                                      type="text"
+                                      value={row.bab || ""}
+                                      onChange={(e) => handleProtaFieldChange("semester1", idx, "bab", e.target.value)}
                                       className="w-full bg-[#FAF8F5] border border-slate-300 rounded p-1 font-sans text-[10px] focus:outline-none"
-                                      rows={2}
                                     />
                                   ) : (
-                                    row.tp
+                                    row.bab || ""
                                   )}
                                 </td>
                                 <td className="px-3 py-2 border-r border-slate-200 font-semibold text-slate-900">
@@ -500,6 +501,18 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                     />
                                   ) : (
                                     row.materi
+                                  )}
+                                </td>
+                                <td className="px-3 py-2 border-r border-slate-200 text-justify">
+                                  {isEditingProta ? (
+                                    <textarea
+                                      value={row.tp}
+                                      onChange={(e) => handleProtaFieldChange("semester1", idx, "tp", e.target.value)}
+                                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded p-1 font-sans text-[10px] focus:outline-none"
+                                      rows={2}
+                                    />
+                                  ) : (
+                                    row.tp
                                   )}
                                 </td>
                                 <td className="px-2 py-2 text-center font-black border-r border-slate-200 text-brand-teal">
@@ -538,7 +551,7 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                               </tr>
                             ))}
                             <tr className="bg-[#FAF8F5] font-black border-t-2 border-slate-800 text-[11px]">
-                              <td colSpan={4} className="px-3 py-2.5 text-right border-r border-slate-200 uppercase tracking-wider text-slate-500">
+                              <td colSpan={5} className="px-3 py-2.5 text-right border-r border-slate-200 uppercase tracking-wider text-slate-500">
                                 Total JP Dialokasikan (Target: {totalJpSem1} JP)
                               </td>
                               <td className="px-2 py-2.5 text-center text-brand-teal font-extrabold border-r border-slate-200 text-xs">
@@ -562,8 +575,9 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                             <tr className="bg-[#48997a] text-white border-b-2 border-slate-800 font-extrabold">
                               <th className="px-2 py-2 w-8 text-center border-r border-slate-800">✓</th>
                               <th className="px-2 py-2 w-8 text-center border-r border-slate-800">No</th>
-                              <th className="px-3 py-2 text-left border-r border-slate-800">Tujuan Pembelajaran</th>
+                              <th className="px-3 py-2 text-left border-r border-slate-800">Bab / Unit</th>
                               <th className="px-3 py-2 text-left border-r border-slate-800">Materi Pokok</th>
+                              <th className="px-3 py-2 text-left border-r border-slate-800">Tujuan Pembelajaran</th>
                               <th className="px-2 py-2 w-12 text-center border-r border-slate-800">JP</th>
                               <th className="px-3 py-2 text-left border-r border-slate-800">Profil Pancasila (DPL)</th>
                               <th className="px-2 py-2 w-24 text-center">Aksi</th>
@@ -582,16 +596,16 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                   </button>
                                 </td>
                                 <td className="px-2 py-2 text-center font-bold border-r border-slate-200">{row.no}</td>
-                                <td className="px-3 py-2 border-r border-slate-200 text-justify">
+                                <td className="px-3 py-2 border-r border-slate-200 font-semibold text-slate-800">
                                   {isEditingProta ? (
-                                    <textarea
-                                      value={row.tp}
-                                      onChange={(e) => handleProtaFieldChange("semester2", idx, "tp", e.target.value)}
+                                    <input
+                                      type="text"
+                                      value={row.bab || ""}
+                                      onChange={(e) => handleProtaFieldChange("semester2", idx, "bab", e.target.value)}
                                       className="w-full bg-[#FAF8F5] border border-slate-300 rounded p-1 font-sans text-[10px] focus:outline-none"
-                                      rows={2}
                                     />
                                   ) : (
-                                    row.tp
+                                    row.bab || ""
                                   )}
                                 </td>
                                 <td className="px-3 py-2 border-r border-slate-200 font-semibold text-slate-900">
@@ -604,6 +618,18 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                                     />
                                   ) : (
                                     row.materi
+                                  )}
+                                </td>
+                                <td className="px-3 py-2 border-r border-slate-200 text-justify">
+                                  {isEditingProta ? (
+                                    <textarea
+                                      value={row.tp}
+                                      onChange={(e) => handleProtaFieldChange("semester2", idx, "tp", e.target.value)}
+                                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded p-1 font-sans text-[10px] focus:outline-none"
+                                      rows={2}
+                                    />
+                                  ) : (
+                                    row.tp
                                   )}
                                 </td>
                                 <td className="px-2 py-2 text-center font-black border-r border-slate-200 text-brand-teal">
@@ -642,7 +668,7 @@ export const PlanningWorkspace: React.FC<PlanningWorkspaceProps> = ({
                               </tr>
                             ))}
                             <tr className="bg-[#FAF8F5] font-black border-t-2 border-slate-800 text-[11px]">
-                              <td colSpan={4} className="px-3 py-2.5 text-right border-r border-slate-200 uppercase tracking-wider text-slate-500">
+                              <td colSpan={5} className="px-3 py-2.5 text-right border-r border-slate-200 uppercase tracking-wider text-slate-500">
                                 Total JP Dialokasikan (Target: {totalJpSem2} JP)
                               </td>
                               <td className="px-2 py-2.5 text-center text-brand-teal font-extrabold border-r border-slate-200 text-xs">
