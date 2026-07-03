@@ -15,17 +15,18 @@ import { AlertCircle, HelpCircle, CheckCircle, Info, RefreshCw, Sliders, Eye, Pe
 // Global Fetch Interceptor for X-User-Email header injection
 const originalFetch = window.fetch;
 window.fetch = async (input, init) => {
-  const url = typeof input === "string" ? input : input.url;
-  let newInit = init ? { ...init } : {};
+  const url = typeof input === "string" ? input : (input && input.url ? input.url : "");
   if (url.includes("/api/") && !url.includes("/api/auth/check-email") && !url.includes("/api/admin/")) {
     const email = localStorage.getItem("userEmail") || "";
     if (email) {
+      const newInit = init ? { ...init } : {};
       const headers = newInit.headers ? { ...newInit.headers } : {};
       (headers as any)["X-User-Email"] = email;
       newInit.headers = headers;
+      return originalFetch(input, newInit);
     }
   }
-  return originalFetch(input, newInit);
+  return originalFetch(input, init);
 };
 
 export default function App() {
