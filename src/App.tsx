@@ -6,6 +6,7 @@ import { GeneratorForm } from "./components/GeneratorForm";
 import { DocumentPreview } from "./components/DocumentPreview";
 import { ProfileModal } from "./components/ProfileModal";
 import { BabSelectionModal } from "./components/BabSelectionModal";
+import { SettingsModal } from "./components/SettingsModal";
 import { GuruProfile, ModulRecord, CurriculumBab } from "./types";
 import { AlertCircle, HelpCircle, CheckCircle, Info, RefreshCw, Sliders, Eye, PenTool } from "lucide-react";
 
@@ -21,6 +22,7 @@ export default function App() {
   // Modals & Loadings
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isBabSelectionOpen, setIsBabSelectionOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [lkpdGenerating, setLkpdGenerating] = useState(false);
@@ -279,6 +281,39 @@ export default function App() {
     }));
 
     showToast("Profil Guru & API Key disimpan dengan sukses!", "success");
+  };
+
+  // Restore Profil Guru & Riwayat
+  const handleRestore = async (restoredProfile: GuruProfile, restoredHistory: ModulRecord[]) => {
+    try {
+      if (restoredProfile) {
+        setProfile(restoredProfile);
+        localStorage.setItem("guruProfile", JSON.stringify(restoredProfile));
+      }
+
+      // Kirim data restorasi ke backend server API
+      try {
+        const response = await fetch("/api/history/restore", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ records: restoredHistory })
+        });
+        if (response.ok) {
+          setHistory(restoredHistory);
+          return true;
+        }
+      } catch (err) {
+        console.warn("Server API offline, memulihkan ke localStorage saja", err);
+      }
+
+      // Fallback local storage
+      localStorage.setItem("modulHistory", JSON.stringify(restoredHistory));
+      setHistory(restoredHistory);
+      return true;
+    } catch (e) {
+      console.error("Gagal memulihkan data backup", e);
+      return false;
+    }
   };
 
   // Hapus Riwayat
@@ -1672,7 +1707,7 @@ Gunakan CSS Tailwind bawaan yang ramah cetak (text-black, font-serif, border-bla
   console.log("Rendering App component...");
   return (
     <div className="min-h-screen bg-[#FAF8F5] flex flex-col text-slate-900 antialiased selection:bg-brand-cream">
-      <Navbar profile={profile} onOpenProfile={() => setIsProfileOpen(true)} />
+      <Navbar profile={profile} onOpenProfile={() => setIsProfileOpen(true)} onOpenSettings={() => setIsSettingsOpen(true)} />
 
       {/* Main Container */}
       <main className="flex-grow max-w-[1440px] 2xl:max-w-[1536px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20 lg:pb-6 flex flex-col gap-6 relative">
@@ -1823,6 +1858,15 @@ Gunakan CSS Tailwind bawaan yang ramah cetak (text-black, font-serif, border-bla
         currentSemester={formValues.semester}
         currentFase={formValues.fase}
         userApiKey={profile?.userApiKey}
+      />
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        profile={profile}
+        history={history}
+        onRestore={handleRestore}
       />
     </div>
   );
